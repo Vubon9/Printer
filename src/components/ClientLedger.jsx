@@ -28,12 +28,16 @@ export default function ClientLedger({
   const [paymentRef, setPaymentRef] = useState('');
   const [paymentNotes, setPaymentNotes] = useState('Account ledger settlement');
 
-  const filteredClients = clients.filter(
-    (c) =>
+  const [dueOnlyFilter, setDueOnlyFilter] = useState(false);
+
+  const filteredClients = clients.filter((c) => {
+    const matchesSearch =
       c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       c.contactPerson?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.email?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+      c.email?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesDue = !dueOnlyFilter || c.balance > 0;
+    return matchesSearch && matchesDue;
+  });
 
   const activeClientInvoices = invoices.filter(
     (inv) => selectedClient && inv.clientId === selectedClient.id
@@ -66,6 +70,23 @@ export default function ClientLedger({
             <h2 style={{ fontSize: '1rem' }}>Clients & Accounts</h2>
             <button className="btn btn-primary btn-sm" onClick={onOpenNewClient}>
               <Plus size={16} /> New Client
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
+            <button
+              className={`btn btn-sm ${!dueOnlyFilter ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => setDueOnlyFilter(false)}
+              style={{ flexGrow: 1 }}
+            >
+              All Clients
+            </button>
+            <button
+              className={`btn btn-sm ${dueOnlyFilter ? 'btn-danger' : 'btn-secondary'}`}
+              onClick={() => setDueOnlyFilter(true)}
+              style={{ flexGrow: 1 }}
+            >
+              Due Only ({clients.filter((c) => c.balance > 0).length})
             </button>
           </div>
 
@@ -112,9 +133,9 @@ export default function ClientLedger({
                     {client.contactPerson} • {client.phone}
                   </div>
 
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', fontSize: '0.8rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem', fontSize: '0.8rem' }}>
                     <span>Balance Due:</span>
-                    <strong style={{ color: isSelected ? '#fff' : client.balance > 0 ? 'var(--warning)' : 'var(--success)' }}>
+                    <strong style={{ color: isSelected ? '#fff' : client.balance > 0 ? 'var(--danger)' : 'var(--success)' }}>
                       {currency}{client.balance?.toLocaleString()}
                     </strong>
                   </div>

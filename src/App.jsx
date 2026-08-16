@@ -339,10 +339,11 @@ function App() {
           {activeTab === 'invoices' && (
             <Invoices
               invoices={appData.invoices}
-              clients={appData.clients}
-              jobs={appData.jobs}
               currency={appData.settings.currency}
               onOpenInvoiceModal={(inv) => setPrintModalState({ open: true, type: 'invoice', data: inv })}
+              onPayDue={(inv) => {
+                setActiveTab('clients');
+              }}
             />
           )}
 

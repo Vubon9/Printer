@@ -2,17 +2,26 @@ import React, { useState } from 'react';
 import {
   Search,
   Printer,
-  Download
+  Download,
+  CreditCard,
+  CheckCircle,
+  AlertCircle,
+  DollarSign
 } from 'lucide-react';
 import { exportToCSV } from '../utils/csvExport';
 
 export default function Invoices({
   invoices,
   currency,
-  onOpenInvoiceModal
+  onOpenInvoiceModal,
+  onPayDue
 }) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all'); // all | due | paid
+
+  const totalBilled = invoices.reduce((sum, inv) => sum + (inv.total || 0), 0);
+  const totalPaid = invoices.reduce((sum, inv) => sum + (inv.paidAmount || 0), 0);
+  const totalDue = invoices.reduce((sum, inv) => sum + (inv.balance || 0), 0);
 
   const filteredInvoices = invoices.filter((inv) => {
     const matchesSearch =
@@ -20,12 +29,48 @@ export default function Invoices({
       inv.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       inv.jobNo?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus = statusFilter === 'all' || inv.status === statusFilter;
+    let matchesStatus = true;
+    if (statusFilter === 'due') {
+      matchesStatus = inv.balance > 0;
+    } else if (statusFilter === 'paid') {
+      matchesStatus = inv.status === 'Paid';
+    }
+
     return matchesSearch && matchesStatus;
   });
 
   return (
     <div className="invoices-view">
+      {/* Top Financial Summary Cards */}
+      <div className="dashboard-grid" style={{ marginBottom: '1.5rem' }}>
+        <div className="glass-card">
+          <div className="kpi-title">Total Billed Invoices</div>
+          <div className="kpi-value">{currency}{totalBilled.toLocaleString()}</div>
+          <div className="kpi-sub">{invoices.length} Invoices Issued</div>
+        </div>
+
+        <div className="glass-card">
+          <div className="kpi-title">Total Paid Amount</div>
+          <div className="kpi-value" style={{ color: 'var(--success)' }}>
+            {currency}{totalPaid.toLocaleString()}
+          </div>
+          <div className="kpi-sub" style={{ color: 'var(--success)' }}>
+            <CheckCircle size={14} style={{ verticalAlign: 'middle' }} /> Settled Receipts
+          </div>
+        </div>
+
+        <div className="glass-card" style={{ border: totalDue > 0 ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid var(--border-color)' }}>
+          <div className="kpi-title">Total Outstanding Due</div>
+          <div className="kpi-value" style={{ color: totalDue > 0 ? 'var(--danger)' : 'var(--success)' }}>
+            {currency}{totalDue.toLocaleString()}
+          </div>
+          <div className="kpi-sub" style={{ color: totalDue > 0 ? 'var(--danger)' : 'var(--success)' }}>
+            <AlertCircle size={14} style={{ verticalAlign: 'middle' }} /> {invoices.filter(i => i.balance > 0).length} Invoices Pending Payment
+          </div>
+        </div>
+      </div>
+
+      {/* Toolbar & Filters */}
       <div
         style={{
           display: 'flex',
@@ -36,7 +81,7 @@ export default function Invoices({
           gap: '1rem'
         }}
       >
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
           <div style={{ position: 'relative', width: '280px' }}>
             <Search
               size={16}
@@ -58,17 +103,27 @@ export default function Invoices({
             />
           </div>
 
-          <select
-            className="form-select"
-            style={{ width: '160px' }}
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="all">All Invoices</option>
-            <option value="Paid">Paid</option>
-            <option value="Partial">Partial</option>
-            <option value="Unpaid">Unpaid</option>
-          </select>
+          {/* Quick Pay / Due Filter Buttons */}
+          <div className="glass-panel" style={{ padding: '0.25rem', display: 'flex', gap: '0.25rem' }}>
+            <button
+              className={`btn btn-sm ${statusFilter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => setStatusFilter('all')}
+            >
+              All Invoices
+            </button>
+            <button
+              className={`btn btn-sm ${statusFilter === 'due' ? 'btn-danger' : 'btn-secondary'}`}
+              onClick={() => setStatusFilter('due')}
+            >
+              <AlertCircle size={14} /> Due Only ({invoices.filter(i => i.balance > 0).length})
+            </button>
+            <button
+              className={`btn btn-sm ${statusFilter === 'paid' ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => setStatusFilter('paid')}
+            >
+              <CheckCircle size={14} /> Paid Only
+            </button>
+          </div>
         </div>
 
         <button
@@ -112,7 +167,7 @@ export default function Invoices({
               {filteredInvoices.length === 0 ? (
                 <tr>
                   <td colSpan="10" style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
-                    No invoices found.
+                    No invoices found matching criteria.
                   </td>
                 </tr>
               ) : (
@@ -127,7 +182,7 @@ export default function Invoices({
                     <td>{inv.dueDate}</td>
                     <td style={{ fontWeight: 700 }}>{currency}{inv.total?.toLocaleString()}</td>
                     <td style={{ color: 'var(--success)' }}>{currency}{inv.paidAmount?.toLocaleString()}</td>
-                    <td style={{ fontWeight: 700, color: inv.balance > 0 ? 'var(--warning)' : 'var(--success)' }}>
+                    <td style={{ fontWeight: 700, color: inv.balance > 0 ? 'var(--danger)' : 'var(--success)' }}>
                       {currency}{inv.balance?.toLocaleString()}
                     </td>
                     <td>
@@ -144,12 +199,22 @@ export default function Invoices({
                       </span>
                     </td>
                     <td>
-                      <button
-                        className="btn btn-outline btn-sm"
-                        onClick={() => onOpenInvoiceModal(inv)}
-                      >
-                        <Printer size={14} /> Print / View
-                      </button>
+                      <div style={{ display: 'flex', gap: '0.4rem' }}>
+                        {inv.balance > 0 && (
+                          <button
+                            className="btn btn-primary btn-sm"
+                            onClick={() => onPayDue && onPayDue(inv)}
+                          >
+                            <CreditCard size={14} /> Pay Due
+                          </button>
+                        )}
+                        <button
+                          className="btn btn-outline btn-sm"
+                          onClick={() => onOpenInvoiceModal(inv)}
+                        >
+                          <Printer size={14} /> Print
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
