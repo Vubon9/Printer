@@ -34,7 +34,9 @@ export const PAPER_TYPES = [
  * Calculate cuts per full sheet
  */
 export function calculateCutsPerSheet(sheetW, sheetH, jobW, jobH) {
-  if (!sheetW || !sheetH || !jobW || !jobH) return 1;
+  if (!sheetW || !sheetH || !jobW || !jobH) {
+    return { cuts: 1, cols: 1, rows: 1, isRotated: false, efficiency: 100 };
+  }
 
   // Straight orientation
   const cols1 = Math.floor(sheetW / jobW);
@@ -46,7 +48,19 @@ export function calculateCutsPerSheet(sheetW, sheetH, jobW, jobH) {
   const rows2 = Math.floor(sheetH / jobW);
   const cuts2 = cols2 * rows2;
 
-  return Math.max(cuts1, cuts2, 1);
+  const totalSheetArea = sheetW * sheetH;
+
+  if (cuts1 >= cuts2 && cuts1 > 0) {
+    const usedArea = cuts1 * jobW * jobH;
+    const efficiency = Math.round((usedArea / totalSheetArea) * 100);
+    return { cuts: cuts1, cols: cols1, rows: rows1, isRotated: false, efficiency, cutW: jobW, cutH: jobH };
+  } else if (cuts2 > 0) {
+    const usedArea = cuts2 * jobW * jobH;
+    const efficiency = Math.round((usedArea / totalSheetArea) * 100);
+    return { cuts: cuts2, cols: cols2, rows: rows2, isRotated: true, efficiency, cutW: jobH, cutH: jobW };
+  }
+
+  return { cuts: 1, cols: 1, rows: 1, isRotated: false, efficiency: 100, cutW: jobW, cutH: jobH };
 }
 
 /**
@@ -77,7 +91,8 @@ export function calculatePrintEstimate(params) {
     taxPercent = 5
   } = params;
 
-  const cutsPerSheet = calculateCutsPerSheet(sheetWidth, sheetHeight, jobWidth, jobHeight);
+  const cutLayout = calculateCutsPerSheet(sheetWidth, sheetHeight, jobWidth, jobHeight);
+  const cutsPerSheet = cutLayout.cuts;
   
   // Total copies / pages
   const totalSheetsNeededNet = Math.ceil((quantity * pages) / cutsPerSheet);
@@ -130,6 +145,7 @@ export function calculatePrintEstimate(params) {
 
   return {
     cutsPerSheet,
+    cutLayout,
     totalFullSheets,
     reamsNeeded,
     paperWeightKg,

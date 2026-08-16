@@ -169,6 +169,68 @@ export default function Settings({ settings, onSaveSettings, onClearAllData }) {
             </div>
           </div>
 
+          <hr style={{ border: 'none', borderTop: '1px solid var(--border-color)', margin: '1.5rem 0' }} />
+
+          <h3 style={{ fontSize: '1rem', color: 'var(--accent-primary)', marginBottom: '1rem' }}>
+            Data Backup & Disaster Recovery
+          </h3>
+
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+            <button
+              type="button"
+              className="btn btn-outline"
+              onClick={() => {
+                const allData = {
+                  settings: formState,
+                  jobs: JSON.parse(localStorage.getItem('press_ledger_jobs') || '[]'),
+                  clients: JSON.parse(localStorage.getItem('press_ledger_clients') || '[]'),
+                  invoices: JSON.parse(localStorage.getItem('press_ledger_invoices') || '[]'),
+                  inventory: JSON.parse(localStorage.getItem('press_ledger_inventory') || '[]'),
+                  ledger: JSON.parse(localStorage.getItem('press_ledger_entries') || '[]'),
+                  exportDate: new Date().toISOString()
+                };
+                const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `press_ledger_backup_${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+              }}
+            >
+              Export JSON Backup File
+            </button>
+
+            <label className="btn btn-secondary" style={{ margin: 0, cursor: 'pointer' }}>
+              Import JSON Backup File
+              <input
+                type="file"
+                accept=".json"
+                style={{ display: 'none' }}
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = (evt) => {
+                    try {
+                      const data = JSON.parse(evt.target.result);
+                      if (data.jobs) localStorage.setItem('press_ledger_jobs', JSON.stringify(data.jobs));
+                      if (data.clients) localStorage.setItem('press_ledger_clients', JSON.stringify(data.clients));
+                      if (data.invoices) localStorage.setItem('press_ledger_invoices', JSON.stringify(data.invoices));
+                      if (data.inventory) localStorage.setItem('press_ledger_inventory', JSON.stringify(data.inventory));
+                      if (data.ledger) localStorage.setItem('press_ledger_entries', JSON.stringify(data.ledger));
+                      if (data.settings) localStorage.setItem('press_ledger_settings', JSON.stringify(data.settings));
+                      alert('Data successfully restored from backup! Refreshing...');
+                      window.location.reload();
+                    } catch (err) {
+                      alert('Invalid backup JSON file.');
+                    }
+                  };
+                  reader.readAsText(file);
+                }}
+              />
+            </label>
+          </div>
+
           <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <button
               type="button"

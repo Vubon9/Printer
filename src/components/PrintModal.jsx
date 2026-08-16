@@ -19,47 +19,50 @@ export default function PrintModal({
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content modal-lg" onClick={(e) => e.stopPropagation()}>
         {/* Action Header - Hidden on Print */}
-        <div className="modal-header no-print">
-          <h3>
-            {type === 'ticket' && `Job Production Ticket - ${data.jobNo}`}
-            {type === 'invoice' && `Tax Invoice - ${data.id}`}
-            {type === 'statement' && `Statement of Account - ${data.name}`}
-          </h3>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <button className="btn btn-primary btn-sm" onClick={handlePrint}>
-              <Printer size={16} /> Print Document
-            </button>
-            <button className="modal-close-btn" onClick={onClose}>×</button>
-          </div>
-        </div>
-
-        {/* Printable Document Area */}
-        <div className="printable-doc">
-          {/* Company Brand Header */}
-          <div className="doc-header">
-            <div>
-              <div className="doc-brand">{settings?.companyName || 'Apex Press'}</div>
-              <div style={{ fontSize: '0.85rem', color: '#475569', marginTop: '0.2rem' }}>
-                {settings?.address} <br />
-                Phone: {settings?.phone} | Email: {settings?.email} <br />
-                TRN / Tax ID: {settings?.taxId}
-              </div>
-            </div>
-
-            <div className="doc-meta">
-              <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>
-                {type === 'ticket' && 'JOB PRODUCTION TICKET'}
-                {type === 'invoice' && 'TAX INVOICE'}
-                {type === 'statement' && 'STATEMENT OF ACCOUNT'}
-              </div>
-              <div style={{ marginTop: '0.5rem' }}>
-                {type === 'ticket' && <div><strong>Ticket #:</strong> {data.jobNo}</div>}
-                {type === 'invoice' && <div><strong>Invoice #:</strong> {data.id}</div>}
-                {type === 'statement' && <div><strong>Client ID:</strong> {data.id}</div>}
-                <div><strong>Date:</strong> {new Date().toISOString().split('T')[0]}</div>
-              </div>
+          <div className="modal-header no-print">
+            <h3>
+              {type === 'ticket' && `Job Production Ticket - ${data.jobNo}`}
+              {type === 'invoice' && `Tax Invoice - ${data.id}`}
+              {type === 'statement' && `Statement of Account - ${data.name}`}
+              {type === 'challan' && `Delivery Challan / Gate Pass - ${data.jobNo}`}
+            </h3>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <button className="btn btn-primary btn-sm" onClick={handlePrint}>
+                <Printer size={16} /> Print Document
+              </button>
+              <button className="modal-close-btn" onClick={onClose}>×</button>
             </div>
           </div>
+
+          {/* Printable Document Area */}
+          <div className="printable-doc">
+            {/* Company Brand Header */}
+            <div className="doc-header">
+              <div>
+                <div className="doc-brand">{settings?.companyName || 'Apex Press'}</div>
+                <div style={{ fontSize: '0.85rem', color: '#475569', marginTop: '0.2rem' }}>
+                  {settings?.address} <br />
+                  Phone: {settings?.phone} | Email: {settings?.email} <br />
+                  TRN / Tax ID: {settings?.taxId}
+                </div>
+              </div>
+
+              <div className="doc-meta">
+                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>
+                  {type === 'ticket' && 'JOB PRODUCTION TICKET'}
+                  {type === 'invoice' && 'TAX INVOICE'}
+                  {type === 'statement' && 'STATEMENT OF ACCOUNT'}
+                  {type === 'challan' && 'DELIVERY CHALLAN / GATE PASS'}
+                </div>
+                <div style={{ marginTop: '0.5rem' }}>
+                  {type === 'ticket' && <div><strong>Ticket #:</strong> {data.jobNo}</div>}
+                  {type === 'invoice' && <div><strong>Invoice #:</strong> {data.id}</div>}
+                  {type === 'statement' && <div><strong>Client ID:</strong> {data.id}</div>}
+                  {type === 'challan' && <div><strong>Challan #:</strong> CH-{data.jobNo}</div>}
+                  <div><strong>Date:</strong> {new Date().toISOString().split('T')[0]}</div>
+                </div>
+              </div>
+            </div>
 
           {/* Type 1: JOB TICKET */}
           {type === 'ticket' && (
@@ -207,6 +210,51 @@ export default function PrintModal({
                   <span style={{ fontSize: '0.8rem', color: '#64748b' }}>Net Outstanding</span>
                   <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#ef4444' }}>{currency}{data.balance?.toLocaleString()}</div>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Type 4: DELIVERY CHALLAN / GATE PASS */}
+          {type === 'challan' && (
+            <div>
+              <div className="doc-details-grid">
+                <div>
+                  <h4 style={{ color: '#64748b', fontSize: '0.75rem', textTransform: 'uppercase' }}>Deliver To Client</h4>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 800 }}>{data.clientName}</div>
+                  <div>Delivery Date: {data.deliveryDate}</div>
+                  <div>Job Order #: {data.jobNo}</div>
+                </div>
+
+                <div style={{ textAlign: 'right' }}>
+                  <h4 style={{ color: '#64748b', fontSize: '0.75rem', textTransform: 'uppercase' }}>Dispatch Info</h4>
+                  <div>Carrier / Driver: Standard Press Delivery</div>
+                  <div>Status: Ready for Shipment</div>
+                </div>
+              </div>
+
+              <table className="doc-table">
+                <thead>
+                  <tr>
+                    <th>Item Description</th>
+                    <th>Specifications & Finished Size</th>
+                    <th>Delivered Qty</th>
+                    <th>Pack Details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{ fontWeight: 700 }}>{data.title}</td>
+                    <td>{data.paper} ({data.finishedSize})</td>
+                    <td style={{ fontWeight: 800 }}>{data.quantity?.toLocaleString()} pcs</td>
+                    <td>Carton / Bundles Packed</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginTop: '4rem', fontSize: '0.8rem', textTransform: 'uppercase', color: '#64748b' }}>
+                <div style={{ borderTop: '1px solid #0f172a', paddingTop: '0.5rem' }}>Prepared By (Press)</div>
+                <div style={{ borderTop: '1px solid #0f172a', paddingTop: '0.5rem' }}>Driver / Transport Sign</div>
+                <div style={{ borderTop: '1px solid #0f172a', paddingTop: '0.5rem' }}>Received By Client (Sign & Seal)</div>
               </div>
             </div>
           )}

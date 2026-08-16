@@ -319,6 +319,7 @@ function App() {
               onUpdateJobStage={handleUpdateJobStage}
               onDeleteJob={handleDeleteJob}
               onOpenPrintTicket={(job) => setPrintModalState({ open: true, type: 'ticket', data: job })}
+              onOpenChallanTicket={(job) => setPrintModalState({ open: true, type: 'challan', data: job })}
               onOpenNewJob={() => setNewJobModalOpen(true)}
             />
           )}

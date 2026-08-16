@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import {
   Search,
-  Printer
+  Printer,
+  Download
 } from 'lucide-react';
+import { exportToCSV } from '../utils/csvExport';
 
 export default function Invoices({
   invoices,
@@ -68,6 +70,25 @@ export default function Invoices({
             <option value="Unpaid">Unpaid</option>
           </select>
         </div>
+
+        <button
+          className="btn btn-secondary"
+          onClick={() =>
+            exportToCSV('press_invoices', filteredInvoices, {
+              id: 'Invoice No',
+              jobNo: 'Job Ref',
+              clientName: 'Client',
+              invoiceDate: 'Date',
+              dueDate: 'Due Date',
+              total: 'Total Amount',
+              paidAmount: 'Paid Amount',
+              balance: 'Balance Due',
+              status: 'Status'
+            })
+          }
+        >
+          <Download size={16} /> Export CSV
+        </button>
       </div>
 
       <div className="glass-panel" style={{ padding: '1rem' }}>

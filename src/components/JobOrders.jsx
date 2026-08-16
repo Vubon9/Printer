@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
 import {
-  Printer,
   Kanban,
   List,
   Search,
   Plus,
   ArrowRight,
   FileText,
-  CheckCircle2,
   Trash2,
   Calendar,
-  User,
-  Package
+  Download,
+  Truck
 } from 'lucide-react';
+import { exportToCSV } from '../utils/csvExport';
 
 const STAGES = [
   'Pre-Press',
@@ -26,10 +25,10 @@ const STAGES = [
 
 export default function JobOrders({
   jobs,
-  clients,
   currency,
   onUpdateJobStage,
   onOpenPrintTicket,
+  onOpenChallanTicket,
   onOpenNewJob,
   onDeleteJob
 }) {
@@ -98,6 +97,25 @@ export default function JobOrders({
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <button
+            className="btn btn-secondary"
+            onClick={() =>
+              exportToCSV('press_job_orders', filteredJobs, {
+                jobNo: 'Job No',
+                title: 'Title',
+                clientName: 'Client',
+                paper: 'Paper Stock',
+                finishedSize: 'Finished Size',
+                quantity: 'Quantity',
+                totalCost: 'Amount',
+                stage: 'Stage',
+                deliveryDate: 'Delivery Date'
+              })
+            }
+          >
+            <Download size={16} /> Export CSV
+          </button>
+
           {/* View Toggle */}
           <div className="glass-panel" style={{ padding: '0.25rem', display: 'flex', gap: '0.25rem' }}>
             <button
@@ -196,6 +214,15 @@ export default function JobOrders({
                               title="Print Job Ticket"
                             >
                               <FileText size={14} />
+                            </button>
+
+                            <button
+                              className="btn btn-outline btn-sm"
+                              style={{ padding: '0.15rem 0.4rem' }}
+                              onClick={() => onOpenChallanTicket && onOpenChallanTicket(job)}
+                              title="Print Delivery Challan"
+                            >
+                              <Truck size={14} />
                             </button>
 
                             {/* Stage Move Forward */}

@@ -411,6 +411,40 @@ export default function PrintEstimator({
                     <span>Estimated Paper Weight:</span>
                     <span>{estimate.paperWeightKg} KG</span>
                   </div>
+
+                  {estimate?.cutLayout && (
+                    <div style={{ marginTop: '0.85rem', paddingTop: '0.75rem', borderTop: '1px dashed var(--border-color)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', fontSize: '0.75rem' }}>
+                        <span>Full Sheet Cut Efficiency</span>
+                        <span className="badge badge-success">{estimate.cutLayout.efficiency}% Efficiency</span>
+                      </div>
+                      
+                      <div style={{ border: '2px dashed var(--accent-primary)', padding: '6px', background: 'rgba(14, 165, 233, 0.05)', borderRadius: '6px' }}>
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: `repeat(${Math.min(estimate.cutLayout.cols, 6)}, 1fr)`,
+                          gap: '4px'
+                        }}>
+                          {Array.from({ length: Math.min(estimate.cutLayout.cuts, 24) }).map((_, idx) => (
+                            <div
+                              key={idx}
+                              style={{
+                                background: 'var(--accent-gradient)',
+                                color: '#fff',
+                                fontSize: '0.65rem',
+                                fontWeight: 700,
+                                padding: '4px 2px',
+                                textAlign: 'center',
+                                borderRadius: '3px'
+                              }}
+                            >
+                              Cut {idx + 1}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="cost-row">

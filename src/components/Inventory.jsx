@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import {
-  Package,
   Plus,
   AlertTriangle,
   Search,
   CheckCircle,
-  RefreshCw,
-  PlusCircle
+  PlusCircle,
+  Download
 } from 'lucide-react';
+import { exportToCSV } from '../utils/csvExport';
 
 export default function Inventory({
   inventory,
@@ -109,9 +109,27 @@ export default function Inventory({
           </select>
         </div>
 
-        <button className="btn btn-primary" onClick={() => setNewItemModalOpen(true)}>
-          <Plus size={18} /> Add Stock Item
-        </button>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <button
+            className="btn btn-secondary"
+            onClick={() =>
+              exportToCSV('press_inventory', filteredInventory, {
+                id: 'Item ID',
+                name: 'Description',
+                category: 'Category',
+                stock: 'Current Stock',
+                unit: 'Unit',
+                minStock: 'Min Threshold',
+                unitPrice: 'Unit Price'
+              })
+            }
+          >
+            <Download size={16} /> Export CSV
+          </button>
+          <button className="btn btn-primary" onClick={() => setNewItemModalOpen(true)}>
+            <Plus size={18} /> Add Stock Item
+          </button>
+        </div>
       </div>
 
       {/* Inventory Table */}
