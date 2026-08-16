@@ -104,13 +104,30 @@ export default function Settings({ settings, onSaveSettings }) {
 
             <div className="form-group">
               <label>Currency Symbol</label>
-              <input
-                type="text"
-                className="form-control"
-                value={formState.currency || '$'}
-                onChange={(e) => handleChange('currency', e.target.value)}
-                required
-              />
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <select
+                  className="form-select"
+                  style={{ width: '130px' }}
+                  value={formState.currency || '৳'}
+                  onChange={(e) => handleChange('currency', e.target.value)}
+                >
+                  <option value="৳">৳ (BDT)</option>
+                  <option value="BDT">BDT</option>
+                  <option value="$">$ (USD)</option>
+                  <option value="€">€ (EUR)</option>
+                  <option value="£">£ (GBP)</option>
+                  <option value="₹">₹ (INR)</option>
+                  <option value="Custom">Custom</option>
+                </select>
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Symbol"
+                  value={formState.currency || ''}
+                  onChange={(e) => handleChange('currency', e.target.value)}
+                  required
+                />
+              </div>
             </div>
           </div>
 

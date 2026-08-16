@@ -14,12 +14,12 @@ const STORAGE_KEYS = {
 const DEFAULT_SETTINGS = {
   companyName: 'Apex Print & Publishing House',
   address: '45 Industrial Press Way, Suite 100, Tech City',
-  phone: '+1 (555) 392-8810',
+  phone: '+880 1711-000000',
   email: 'billing@apexpress.com',
-  taxId: 'TAX-883921-P',
-  currency: '$',
-  ctpPlateRate: 15,
-  impressionRatePerThousand: 8,
+  taxId: 'BIN-883921-P',
+  currency: '৳',
+  ctpPlateRate: 250,
+  impressionRatePerThousand: 150,
   defaultTaxPercent: 5,
 };
 
