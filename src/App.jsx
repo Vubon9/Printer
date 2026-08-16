@@ -14,12 +14,17 @@ import PrintModal from './components/PrintModal';
 import {
   loadAllAppData,
   saveStoredData,
+  clearAllAppData,
   STORAGE_KEYS
 } from './utils/storage';
 import './App.css';
 
 function App() {
-  const [appData, setAppData] = useState(() => loadAllAppData());
+  const [appData, setAppData] = useState(() => {
+    // Force clear old mock data so user has clean slate
+    clearAllAppData();
+    return loadAllAppData();
+  });
   const [activeTab, setActiveTab] = useState('dashboard');
   const [theme, setTheme] = useState('dark');
 
@@ -361,6 +366,10 @@ function App() {
             <Settings
               settings={appData.settings}
               onSaveSettings={updateSettings}
+              onClearAllData={() => {
+                clearAllAppData();
+                setAppData(loadAllAppData());
+              }}
             />
           )}
         </main>

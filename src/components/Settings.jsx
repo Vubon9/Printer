@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Settings as SettingsIcon, Save, CheckCircle } from 'lucide-react';
 
-export default function Settings({ settings, onSaveSettings }) {
+export default function Settings({ settings, onSaveSettings, onClearAllData }) {
   const [formState, setFormState] = useState({ ...settings });
   const [savedSuccess, setSavedSuccess] = useState(false);
 
@@ -169,7 +169,19 @@ export default function Settings({ settings, onSaveSettings }) {
             </div>
           </div>
 
-          <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end' }}>
+          <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <button
+              type="button"
+              className="btn btn-danger"
+              onClick={() => {
+                if (window.confirm('Are you sure you want to clear all jobs, clients, invoices, inventory, and ledger entries?')) {
+                  onClearAllData();
+                }
+              }}
+            >
+              Clear All Data & Reset
+            </button>
+
             <button type="submit" className="btn btn-primary btn-lg">
               <Save size={18} /> Save Settings
             </button>
